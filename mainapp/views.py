@@ -46,13 +46,15 @@ class Detail_3D_object(APIView):
         obj = Object_3d.objects.filter(id=pk).first()
         seriailzer = Detail_3DSerializer(obj)
         
-        if pk == 13 or pk == 17:
-            file_name = 'bun_zipper.ply'
-        elif pk == 14:
-            file_name = 'gear.ply'
-        elif pk == 15:
-            file_name = 'Motorcycle_cylinder_head.ply'
-        obj_url = request.build_absolute_uri(settings.MEDIA_URL + file_name.replace('.ply', '.obj'))
+        # if pk == 13 or pk == 17:
+        #     file_name = 'bun_zipper.ply'
+        # elif pk == 14:
+        #     file_name = 'gear.ply'
+        # elif pk == 15:
+        #     file_name = 'Motorcycle_cylinder_head.ply'
+        # obj_url = request.build_absolute_uri(settings.MEDIA_URL + file_name.replace('.ply', '.obj'))
+        file_name = obj.name + '.ply'
+        obj_url = request.build_absolute_uri(settings.MEDIA_URL + file_name)
         data = seriailzer.data
         data['obj_url'] =  obj_url
         # print(data)
