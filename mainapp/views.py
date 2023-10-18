@@ -20,7 +20,7 @@ from django.db import connections
 
 class get_object_3d(viewsets.ModelViewSet):
     serializer_class = Object_3DSerializer
-    queryset = Object_3d.objects.all()
+    queryset = Object_3d.objects.all().order_by('-id')
 
 # def ConvertToObj(path = r"C:\Users\User\Downloads\Input.ply",
 #                  o_path = r"C:\Users\danie\Output.obj"):
@@ -81,7 +81,7 @@ class ChangeSelect_3DObject(APIView):
 class test(APIView):
     def post(self, request, format=None):
         obj = Object_3d.objects.filter(id=13).values('id', 'route')
-        print(obj)
+        # print(obj)
         with connections['externalDB'].cursor() as cursor:
             cursor.execute("INSERT INTO object (points_id) VALUES (%s)", [3])
         

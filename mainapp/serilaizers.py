@@ -14,7 +14,7 @@ class Object_3DSerializer(serializers.ModelSerializer):
         fields = ('id', 'date', 'dotsCol', 'image', 'modelCol', 'name', 'rotation', 'is_pinned', "is_selected", 'route')
     
     def create(self, validated_data):
-        print(validated_data)
+        # print(validated_data)
         route_data = validated_data.pop('route', None)
         object_3d = Object_3d.objects.create(**validated_data)
 
