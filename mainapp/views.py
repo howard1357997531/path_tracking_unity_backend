@@ -57,7 +57,7 @@ class Detail_3D_object(APIView):
         obj_url = request.build_absolute_uri(settings.MEDIA_URL + file_name)
         data = seriailzer.data
         data['obj_url'] =  obj_url
-        # print(data)
+        print(obj_url)
         return Response(data)
     
     def put(self, request, pk, format=None):
