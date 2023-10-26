@@ -8,7 +8,6 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from .models import Object_3d
 from .serilaizers import Object_3DSerializer, Detail_3DSerializer, SavePlySerializer
-# import aspose.threed as a3d
 import os
 from django.db import connections
 

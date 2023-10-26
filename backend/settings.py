@@ -100,9 +100,9 @@ DATABASES = {
 }
 
 # 要連接要先 migrate, 但要先 pip install psycopg2-binary
-# database_url = 'postgres://db_3d_etup_user:xNW6CuYwQoFIn2EtrrkGiPaf5n1Zfvog@dpg-cji1nq337aks73cqt510-a.singapore-postgres.render.com/db_3d_etup'
+database_url = 'postgres://unity_user:wGNyGRy4uCUSq5JzhCHHa69KGzc8PQta@dpg-cksspb0168ec73dtu7i0-a.singapore-postgres.render.com/unity'
 # database_url = os.environ.get('DATABASE_URL')
-# DATABASES['default'] = dj_database_url.parse(database_url)
+DATABASES['default'] = dj_database_url.parse(database_url)
 
 # database_url : (external database)
 # postgres://django_render_sql_user:UlqCcY0HqCzRK6NCS58hVRxinWFHVxZM@dpg-cj3llamnqql8v0de9t20-a.oregon-postgres.render.com/django_render_sql
