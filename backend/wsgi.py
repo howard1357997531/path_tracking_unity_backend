@@ -27,5 +27,5 @@ application = get_wsgi_application()
 ALLOWED_HOSTS  threed-object.onrender.com localhost
 DATABASE_URL   postgres://django_render_sql_user:UlqCcY0HqCzRK6NCS58hVRxinWFHVxZM@dpg-cj3llamnqql8v0de9t20-a/django_render_sql
 DEBUG          False
-SECRET_KEY     
+SECRET_KEY     自己生成
 '''

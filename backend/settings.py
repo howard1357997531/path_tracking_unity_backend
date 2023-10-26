@@ -27,9 +27,9 @@ SECRET_KEY = 'django-insecure-2$uk$(xm$5yak(+q-_d+mv6u$+(v-z_hxc(to@4l(0l$-*-b&w
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
-# SECRET_KEY = os.environ.get('SECRET_KEY')
-# DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
-# ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(' ')
+SECRET_KEY = os.environ.get('SECRET_KEY')
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(' ')
 
 # Application definition
 
@@ -101,7 +101,7 @@ DATABASES = {
 
 # 要連接要先 migrate, 但要先 pip install psycopg2-binary
 database_url = 'postgres://unity_user:wGNyGRy4uCUSq5JzhCHHa69KGzc8PQta@dpg-cksspb0168ec73dtu7i0-a.singapore-postgres.render.com/unity'
-# database_url = os.environ.get('DATABASE_URL')
+database_url = os.environ.get('DATABASE_URL')
 DATABASES['default'] = dj_database_url.parse(database_url)
 
 # database_url : (external database)
