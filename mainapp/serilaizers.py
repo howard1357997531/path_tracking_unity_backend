@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import Object_3d, Route
+from .models import InitialObject, Object_3d, Route
+
+class InitialObjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InitialObject
+        fields = '__all__'
+        # fields = ('id', 'name', 'ply_file', 'camera_image')
 
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,7 +17,8 @@ class Object_3DSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object_3d
-        fields = ('id', 'date', 'dotsCol', 'image', 'modelCol', 'name', 'rotation', 'is_pinned', "is_selected", 'route')
+        fields = ('id', 'date', 'dotsCol', 'image', 'modelCol', 'name', 'rotation', 
+                  'is_pinned', 'is_selected', 'initial_objecte_id', 'route')
     
     def create(self, validated_data):
         # print(validated_data)

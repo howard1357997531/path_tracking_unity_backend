@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-import dj_database_url
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -98,6 +97,7 @@ DATABASES = {
     # }
 
 }
+import dj_database_url
 
 # 要連接要先 migrate, 但要先 pip install psycopg2-binary
 # database_url = 'postgres://unity_user:wGNyGRy4uCUSq5JzhCHHa69KGzc8PQta@dpg-cksspb0168ec73dtu7i0-a.singapore-postgres.render.com/unity'
@@ -129,9 +129,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-Hant'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Taipei'
 
 USE_I18N = True
 
@@ -151,7 +151,7 @@ STATIC_ROOT = os.path.join(BASE_DIR / 'staticfiles')
 
 MEDIA_URL = '/media/'
 
-MEDIA_ROOT = BASE_DIR / 'static/media'  # 實際存的地方(照片存在電腦的位置)
+MEDIA_ROOT = BASE_DIR / 'static/media' 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -160,3 +160,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+REST_FRAMEWORK = {
+    'DATETIME_FORMAT': '%Y/%m/%d %H:%M:%S',
+}

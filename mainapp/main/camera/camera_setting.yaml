@@ -1,0 +1,53 @@
+### Camera Setting For [Intel, Kinect, ZED2], free free to add more setting.
+### Some sub set of camera setting are null, in those case, it wouldn't not to use on other camera (except serial number).
+
+baseConfig : 
+  fps:
+    # FPS for the camera.
+
+    Intel: 30 
+    Kinect: 30 #In some resolution setting, the fps maybe cannot archieve 30 fps. In this case, application will force convert to suitable value.
+    ZED2: 30 #In some resolution setting, the fps maybe cannot archieve 30 fps. In this case, application will force convert to suitable value.
+
+  resolution:
+    #Resolution for the camera.
+
+    Intel: 1080p # RESOLUTION mustbe [540p, 720p, 1080p], Noted that 15 fps is highest fps  when using 1440p resolution.
+    Kinect: 1080p # RESOLUTION mustbe [720p, 1080p, 3072p], Noted that 15 fps is highest fps  when using 3072 resolution.
+    ZED2: 1080p   # RESOLUTION mustbe [VGA, 720p, 1080p, 1440p], Noted that 15 fps is highest fps  when using 1440p resolution.
+
+  serialNumber:
+    # It auto connect current camera by official camera program when setting serialnumber as null.
+    
+    Intel: null  
+    Kinect: null 
+    ZED2: null    
+
+  depthMode:
+    Intel: true # depthMode mustbe bool type object.
+    Kinect: WFOV # depthMode mustbe [WFOV_2x2, NFOV_2x2, WFOV]
+    ZED2: NEURAL # depthMode mustbe [PERFORMANCE, QUALITY, ULTRA, NEURAL]       
+
+
+## For external Config, maybe you need to write your own code.
+externalConfig:
+  # For Kinect camera
+  Kinect:  
+    algin: color  # Algin parameter for kinect camera, align mustbe [pointcloud, color].
+    ColorFormat: BGR 
+
+  # For ZED camera  
+  ZED2:
+    cameraSide: L # cameraSide mustbe [L, R] Default setting R.   
+    minDepthDist: 0.3  # It is the minimum depth distance threshold for camera. current only test for ZED2.
+    coordinate_units: MILLIMETER # Unit of metrics.
+
+  # For Intel camera    
+  Intel:
+    min_distance: 0
+    laser_power: 100
+    
+### Reference: 
+# ZED Setting : https://www.stereolabs.com/docs/api/structsl_1_1InitParameters.html#a115c93ba994ec7b5c853375d647a936e
+# Kinect Setting: https://github.com/etiennedub/pyk4a/blob/master/pyk4a/config.py.   -> class Config
+# Realsense Setting: https://intelrealsense.github.io/librealsense/python_docs/_generated/pyrealsense2.html 

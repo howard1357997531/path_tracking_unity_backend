@@ -1,21 +1,156 @@
 from django.shortcuts import render
 from django.conf import settings
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from .models import Object_3d
-from .serilaizers import Object_3DSerializer, Detail_3DSerializer, SavePlySerializer
+from .models import InitialObject, Object_3d
+from .serilaizers import InitialObjectSerializer, Object_3DSerializer, Detail_3DSerializer, SavePlySerializer
 import os
+import shutil
 from django.db import connections
+from .camera.camClass import cameraApplications
 
-# @api_view(['GET'])
-# def get_object_3d(request):
-#     products = object_3d.objects.all()
-#     serializer = object_3dSerializer(products, many=True)
-#     return Response(serializer.data)
+@api_view(['POST'])
+def execute_robot(request):
+    try:
+        id = request.data.get('id')
+        obj = Object_3d.objects.filter(id=int(id)).first()
+        serializer = Object_3DSerializer(obj, many=False)
+        print(serializer.data.get('route'))
+        return Response('ok', status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def open_camera(request):
+    try:
+        camRobot = cameraApplications()
+        result, img_res_path = camRobot.capture("open")
+        if result:
+            return Response({"state": "ok", "image": img_res_path}, status=status.HTTP_200_OK)
+        return Response({"state": "camera problem",}, status=status.HTTP_200_OK)
+    except:
+        return Response({"state": "error",}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def screen_shot(request):
+    try:
+        camRobot = cameraApplications()
+        result, img_res_path = camRobot.capture("screen_shot")
+        if result:
+            return Response({"state": "ok", "image": img_res_path}, status=status.HTTP_200_OK)
+        return Response({"state": "camera problem",}, status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def save_ply(request):
+    try:
+        camRobot = cameraApplications()
+        result, _ = camRobot.capture("save_ply")
+        if result:
+            obj = InitialObject.objects.filter(is_finished=True).last()
+            serializer = InitialObjectSerializer(obj, many=False)
+            return Response({"state": "ok", "obj_data": serializer.data}, status=status.HTTP_200_OK)
+        return Response({"state": "camera problem",}, status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def preprocessing_ply(request):
+    try:
+        name = request.data.get('name')
+        init_obj = InitialObject.objects.filter(is_finished=True).last()
+        if init_obj.name != name:
+            print('asd')
+            init_obj.name = name
+            init_obj.save()
+        return Response('ok', status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_initial_object(request):
+    try:
+        obj = InitialObject.objects.all().order_by('-id')
+        serializer = InitialObjectSerializer(obj, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def pin_initial_object(request, pk):
+    try:
+        init_obj = InitialObject.objects.filter(id=int(pk)).first()
+        init_obj.is_pinned = request.data.get('is_pinned')
+        init_obj.save()
+        serializer = InitialObjectSerializer(init_obj, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except:
+        return Response('error',status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def select_initial_object(request, pk):
+    try:
+        InitialObject.objects.update(is_selected=False)
+        init_obj = InitialObject.objects.filter(id=int(pk)).first()
+        init_obj.is_selected = request.data.get('is_selected')
+        init_obj.save()
+        return Response('ok', status=status.HTTP_200_OK)
+    except:
+        Response('error',status=status.HTTP_400_BAD_REQUEST)
+
+class initial_3D_object(APIView):
+    def get(self, request):
+        obj = InitialObject.objects.all()
+        serializer = InitialObjectSerializer(obj, many=True)
+        return Response(serializer.data, status=200)
+
+    def post(self, request):
+        init_obj = InitialObject.objects.filter(is_finished=False).first()
+        if init_obj:
+            if request.data.get('state') == 'image':
+                image_file = request.data.get('image_file')
+                print(request.data)
+                return Response('ok', status=200)
+            else:
+                init_obj.is_finished = True
+                init_obj.save()
+            return Response('ok', status=200)
+        else:
+            serializer = InitialObjectSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=201)
+        return Response("error", status=400)
+    
+class initial_3D_object_detail(APIView):
+    def get_object(self, pk):
+        try:
+            return InitialObject.objects.filter(id=int(pk)).first()
+        except:
+            return Response('error', status=400)
+        
+    def get(self, request, pk):
+        data = self.get_object(pk)
+        serializer = InitialObjectSerializer(data, many=False)
+        return Response(serializer.data, status=200)
+    
+    def put(self, request, pk):
+        data = self.get_object(pk)
+        serializer = InitialObjectSerializer(data, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response('error', status=400)
+    
+    def delete(self, request, pk):
+        data = self.get_object(pk)
+        data.delete()
+        return Response({'delete'}, status=204)
 
 class get_object_3d(viewsets.ModelViewSet):
     serializer_class = Object_3DSerializer
