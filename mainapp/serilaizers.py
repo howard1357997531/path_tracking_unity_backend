@@ -1,11 +1,79 @@
 from rest_framework import serializers
-from .models import InitialObject, Object_3d, Route
+from .models import *
 
 class InitialObjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = InitialObject
         fields = '__all__'
         # fields = ('id', 'name', 'ply_file', 'camera_image')
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['index']
+
+class PointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Point
+        fields = ['points']
+
+class ContiPointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContiPoint
+        fields = ['points']
+
+class LinePointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LinePoint
+        fields = ['points']
+
+class SquarePointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SquarePoint
+        fields = ['points']
+
+class PolygonPointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PolygonPoint
+        fields = ['points']
+
+class RecPointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecPoint
+        fields = ['points']
+
+class CirclePointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CirclePoint
+        fields = ['points']
+
+class OvalPointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OvalPoint
+        fields = ['points']
+
+class ArcPointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArcPoint
+        fields = ['points']        
+
+class DrawObjectSerializer(serializers.ModelSerializer):
+    order = OrderSerializer(many=True, required=False)
+    point = PointSerializer(many=True, required=False)
+    contiPoint = ContiPointSerializer(many=True, required=False)
+    linePoint = LinePointSerializer(many=True, required=False)
+    squarePoint = SquarePointSerializer(many=True, required=False)
+    polygonPoint = PolygonPointSerializer(many=True, required=False)
+    recPoint = RecPointSerializer(many=True, required=False)
+    circlePoint = CirclePointSerializer(many=True, required=False)
+    ovalPoint = OvalPointSerializer(many=True, required=False)
+    arcPoint = ArcPointSerializer(many=True, required=False)
+    class Meta:
+        model = DrawObject
+        fields = ('id', 'date', 'dotsCol', 'image', 'modelCol', 'name', 'rotation', 
+                  'is_pinned', 'is_selected', 'initial_objecte_id', 'order', 'point', 'contiPoint',
+                  'linePoint', 'squarePoint' , 'polygonPoint', 'recPoint', 'circlePoint',
+                  'ovalPoint', 'arcPoint')
 
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:

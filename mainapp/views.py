@@ -6,29 +6,59 @@ from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from .models import InitialObject, Object_3d
-from .serilaizers import InitialObjectSerializer, Object_3DSerializer, Detail_3DSerializer, SavePlySerializer
+from .models import *
+from .serilaizers import (InitialObjectSerializer, Object_3DSerializer, Detail_3DSerializer, SavePlySerializer,
+                    DrawObjectSerializer)
 import os
 import shutil
 from django.db import connections
-from .camera.camClass import cameraApplications
+# from .camera.camClass import cameraApplications
+from .main.camClass import cameraApplications
+from .main.camRobot import cameraRobot
 
 @api_view(['POST'])
 def execute_robot(request):
     try:
         id = request.data.get('id')
-        obj = Object_3d.objects.filter(id=int(id)).first()
-        serializer = Object_3DSerializer(obj, many=False)
-        print(serializer.data.get('route'))
-        return Response('ok', status=status.HTTP_200_OK)
+        obj = DrawObject.objects.filter(id=int(id)).first()
+        serializer = DrawObjectSerializer(obj, many=False)
+        data = serializer.data.get('point')
+        # print(data)
+        print(id)
+
+        # robot
+        camRobot = cameraRobot()  
+        points = camRobot.parse_data(data)
+
+        real_position = camRobot.convert2real(points)
+
+        # os.system(camRobot.ethnet_command)     
+        camRobot.connect()
+        camRobot.send_robot_data(real_position)
+        # os.system(camRobot.wifi_command)
+        # print(points)
+        print('手臂結束')
+        return Response(data, status=status.HTTP_200_OK)
     except:
         return Response('error', status=status.HTTP_400_BAD_REQUEST)
-
+import time
 @api_view(['POST'])
 def open_camera(request):
     try:
-        camRobot = cameraApplications()
+        time.sleep(2)
+        result=True
+        img_res_path = 'media/camera_data/60/1.jpg'
+
+        # intel_camera
+        # camRobot = cameraRobot('intel_camera')
+        # result, img_res_path = camRobot.capture("open")
+        
+        # zivid
+        camRobot = cameraRobot()
+        # os.system(camRobot.ethnet_command)
         result, img_res_path = camRobot.capture("open")
+        # os.system(camRobot.wifi_command)     
+
         if result:
             return Response({"state": "ok", "image": img_res_path}, status=status.HTTP_200_OK)
         return Response({"state": "camera problem",}, status=status.HTTP_200_OK)
@@ -38,8 +68,20 @@ def open_camera(request):
 @api_view(['POST'])
 def screen_shot(request):
     try:
-        camRobot = cameraApplications()
+        time.sleep(2)
+        result=True
+        img_res_path = 'media/camera_data/60/2.jpg'
+
+        # intel_camera
+        # camRobot = cameraRobot('intel_camera')
+        # result, img_res_path = camRobot.capture("screen_shot")
+
+        # zivid
+        camRobot = cameraRobot()
+        # os.system(camRobot.ethnet_command)
         result, img_res_path = camRobot.capture("screen_shot")
+        # os.system(camRobot.wifi_command)  
+        
         if result:
             return Response({"state": "ok", "image": img_res_path}, status=status.HTTP_200_OK)
         return Response({"state": "camera problem",}, status=status.HTTP_200_OK)
@@ -49,8 +91,18 @@ def screen_shot(request):
 @api_view(['POST'])
 def save_ply(request):
     try:
-        camRobot = cameraApplications()
+        time.sleep(2)
+        result=True
+
+        # intel_camera
+        # camRobot = cameraRobot('intel_camera')
+        # result, _ = camRobot.capture("save_ply")
+
+        # zivid
+        camRobot = cameraRobot()
+        # os.system(camRobot.ethnet_command)
         result, _ = camRobot.capture("save_ply")
+        # os.system(camRobot.wifi_command) 
         if result:
             obj = InitialObject.objects.filter(is_finished=True).last()
             serializer = InitialObjectSerializer(obj, many=False)
@@ -102,6 +154,137 @@ def select_initial_object(request, pk):
         return Response('ok', status=status.HTTP_200_OK)
     except:
         Response('error',status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def save_draw_object(request):
+    try:
+        '''
+        order index 對應資料:
+        "Point", "IrregularConti", "Line", "Square", 
+        "Rectangle", "Polygon", "Circle", "Oval", "Arc"
+
+        contiPoint 連續標點
+        linePoint   形狀標點 Line
+        squarePoint 形狀標點 Square
+        '''
+        # data = request.data
+        # del data['image']
+        # print(data)
+        # print(','.join(map(str, data.get('order'))))
+        if request.data.get('route', None) == None:
+            obj = DrawObject.objects.create(
+                date=request.data.get('date'),
+                dotsCol=request.data.get('dotsCol'),
+                image=request.data.get('image'),
+                modelCol=request.data.get('modelCol'),
+                name=request.data.get('name'),
+                rotation=request.data.get('rotation'),
+                initial_objecte_id=request.data.get('id'),
+                        )
+            
+            for i in request.data.get('order'):
+                Order.objects.create(
+                    draw_object = obj,
+                    index= i.get('index')
+                )
+            
+            for i in request.data.get('point'):
+                Point.objects.create(
+                    draw_object = obj,
+                    points = i.get('points')
+                )
+
+            for i in request.data.get('contiPoint'):
+                ContiPoint.objects.create(
+                    draw_object = obj,
+                    points = i.get('points')
+                )
+
+            for i in request.data.get('linePoint'):
+                LinePoint.objects.create(
+                    draw_object = obj,
+                    points = i.get('points')
+                )
+
+            for i in request.data.get('squarePoint'):
+                SquarePoint.objects.create(
+                    draw_object = obj,
+                    points = i.get('points')
+                )
+            
+            for i in request.data.get('polygonPoint'):
+                PolygonPoint.objects.create(
+                    draw_object = obj,
+                    points = i.get('points')
+                )
+
+            for i in request.data.get('recPoint'):
+                RecPoint.objects.create(
+                    draw_object = obj,
+                    points = i.get('points')
+                )
+
+            for i in request.data.get('circlePoint'):
+                CirclePoint.objects.create(
+                    draw_object = obj,
+                    points = i.get('points')
+                )
+
+            for i in request.data.get('ovalPoint'):
+                OvalPoint.objects.create(
+                    draw_object = obj,
+                    points = i.get('points')
+                )
+
+            for i in request.data.get('arcPoint'):
+                ArcPoint.objects.create(
+                    draw_object = obj,
+                    points = i.get('points')
+                )
+        return Response('', status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_draw_object(request):
+    try:
+        obj = DrawObject.objects.all().order_by('-id')
+        serializer = DrawObjectSerializer(obj, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_single_draw_object(request, pk):
+    try:
+        obj = DrawObject.objects.filter(id=int(pk)).first()
+        serializer = DrawObjectSerializer(obj, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def pin_draw_object(request, pk):
+    try:
+        obj = DrawObject.objects.filter(id=int(pk)).first()
+        obj.is_pinned = request.data.get('is_pinned')
+        obj.save()
+        serializer = DrawObjectSerializer(obj, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def select_draw_object(request, pk):
+    try:
+        DrawObject.objects.update(is_selected=False)
+        obj = DrawObject.objects.filter(id=int(pk)).first()
+        obj.is_selected = request.data.get('is_selected')
+        obj.save()
+        serializer = DrawObjectSerializer(obj, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
 
 class initial_3D_object(APIView):
     def get(self, request):

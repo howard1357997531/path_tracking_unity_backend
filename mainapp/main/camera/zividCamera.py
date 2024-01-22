@@ -4,6 +4,7 @@ import zivid
 import datetime
 import os
 import cv2
+from django.conf import settings
 
 # update in 2022/05/09
 class zividCamera:
@@ -21,7 +22,8 @@ class zividCamera:
         self.settings_2d = settings_2d
 
         # 3D camera setting
-        settings_file = "auto3d.yml"
+        # settings_file = "auto3d.yml"
+        settings_file = os.path.join(settings.MEDIA_ROOT, "auto3d.yml")
         self.settings = zivid.Settings.load(settings_file)
 
         # Saving Path

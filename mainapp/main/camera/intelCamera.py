@@ -4,10 +4,11 @@ import time
 import yaml
 import os
 import logging
-
+from django.conf import settings
 
 class L515:
     def __init__(self):
+        self.yaml_path = os.path.join(settings.MEDIA_ROOT, 'camera_setting.yaml')
         # init setting
         self.camera = "Intel"
         # camera init
@@ -61,7 +62,9 @@ class L515:
                 raise
 
     def loadSetting(self):
-        yaml_file = "./camera/camera_setting.yaml"
+        # yaml_file = "./camera/camera_setting.yaml"
+        yaml_file = self.yaml_path
+        
         assert (os.path.isfile(yaml_file), "No such file found on folder.")
 
         if os.path.isfile(yaml_file):
@@ -237,8 +240,8 @@ class D435I:
             raise
 
     def loadSetting(self):
-
-        with open("./camera/camera_setting.yaml", "r") as f:
+        yaml_file = self.yaml_path
+        with open(yaml_file, "r") as f:
             configData = yaml.load(f, yaml.Loader)
             config = {}
             for k, v in configData.items():

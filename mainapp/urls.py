@@ -7,6 +7,11 @@ router.register(r'get_object_3d', views.get_object_3d, basename='get_object_3d')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('save_draw_object/', views.save_draw_object, name="save_draw_object"),
+    path('get_draw_object/', views.get_draw_object, name="get_draw_object"),
+    path('get_single_draw_object/<int:pk>/', views.get_single_draw_object, name="get_single_draw_object"),
+    path('pin_draw_object/<int:pk>/', views.pin_draw_object, name="pin_draw_object"),
+    path('select_draw_object/<int:pk>/', views.select_draw_object, name="select_draw_object"),
     path('execute_robot/', views.execute_robot, name="execute_robot"),
     path('open_camera/', views.open_camera, name="open_camera"),
     path('screen_shot/', views.screen_shot, name="screen_shot"),

@@ -44,3 +44,91 @@ class Route(Common):
     def __str__(self):
         return str(self.points)
     
+# --------------------------------------
+class DrawObject(Common):
+    date = models.CharField(max_length=225, null=True, blank=True)
+    dotsCol = models.CharField(max_length=225, null=True, blank=True)
+    image = models.TextField(null=True, blank=True)
+    modelCol = models.CharField(max_length=225, null=True, blank=True)
+    name = models.CharField(max_length=225, null=True, blank=True)
+    rotation = models.CharField(max_length=225, null=True, blank=True)
+    is_pinned = models.BooleanField(default=False)
+    is_selected = models.BooleanField(default=False)
+    initial_objecte_id = models.IntegerField(default=1)
+
+    def __str__(self):
+        return str(self.id)
+
+class Order(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="order", on_delete=models.CASCADE, null=True, blank=True)
+    index = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.index)
+    
+class Point(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="point", on_delete=models.CASCADE, null=True, blank=True)
+    points = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.points)
+    
+class ContiPoint(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="contiPoint", on_delete=models.CASCADE, null=True, blank=True)
+    points = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.points)
+    
+class LinePoint(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="linePoint", on_delete=models.CASCADE, null=True, blank=True)
+    points = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.points)
+
+class SquarePoint(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="squarePoint", on_delete=models.CASCADE, null=True, blank=True)
+    points = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.points)
+    
+class PolygonPoint(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="polygonPoint", on_delete=models.CASCADE, null=True, blank=True)
+    points = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.points)
+    
+class RecPoint(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="recPoint", on_delete=models.CASCADE, null=True, blank=True)
+    points = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.points)
+    
+class CirclePoint(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="circlePoint", on_delete=models.CASCADE, null=True, blank=True)
+    points = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.points)
+    
+class OvalPoint(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="ovalPoint", on_delete=models.CASCADE, null=True, blank=True)
+    points = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.points)
+    
+class ArcPoint(Common):
+    draw_object = models.ForeignKey(DrawObject, related_name="arcPoint", on_delete=models.CASCADE, null=True, blank=True)
+    points = models.CharField(max_length=225, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.points)
+    
+
+
+

@@ -12,3 +12,17 @@ class object_3dAdmin(admin.ModelAdmin):
 @admin.register(Route)
 class routeAdmin(admin.ModelAdmin):
     list_display = ('id', 'object_3d', 'points')
+
+@admin.register(DrawObject)
+class DrawObjectAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+
+admin.site.register(Order)
+admin.site.register(Point)
+admin.site.register(ContiPoint)
+admin.site.register(LinePoint)
+admin.site.register(SquarePoint)
+admin.site.register(PolygonPoint)
+admin.site.register(RecPoint)
+admin.site.register(CirclePoint)
+admin.site.register(ArcPoint)
