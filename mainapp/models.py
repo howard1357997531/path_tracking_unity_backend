@@ -54,7 +54,7 @@ class DrawObject(Common):
     rotation = models.CharField(max_length=225, null=True, blank=True)
     is_pinned = models.BooleanField(default=False)
     is_selected = models.BooleanField(default=False)
-    initial_objecte_id = models.IntegerField(default=1)
+    initial_object_id = models.IntegerField(default=1)
 
     def __str__(self):
         return str(self.id)

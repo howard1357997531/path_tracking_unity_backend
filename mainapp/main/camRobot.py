@@ -4,6 +4,7 @@ import requests
 import json
 import re
 import open3d as o3d
+from scipy import spatial
 # from camera2robot import cam2world
 from .KRLTest import connectObj
 from .camClass import cameraApplications
@@ -13,14 +14,20 @@ from django.conf import settings
 class cameraRobot(cameraApplications):
     def __init__(self, camera_name = 'ZIVID'):
         super().__init__(camera_name)
+
         self.camera_name = camera_name
         self.ip = "192.168.2.100"  # robobt ip
 
+        self.downsample = not  True 
         self.port = 54600  # port
 
         self.robot_pose_scan = np.array(
             [573.95,186.87 ,513.46 , -180.00 ,0.00,180.00], dtype = np.float32
         )  # Robot Home Position
+
+        # self.robot_pose_scan = np.array(
+        #     [573.95,186.87 ,598.54 , -180.00 ,0.00,180.00], dtype = np.float32
+        # )  # Robot Home Position
 
         self.max_points = 500  # Maxium points send to robot
 
@@ -44,9 +51,39 @@ class cameraRobot(cameraApplications):
         y =  point[1]
         z = point[2]
 
-        x = x*10 - 4.5 if x  >0 else x*10 + 4.5
-        y = y*10  - 2.65 if y > 0 else y*10 + 2.65
-        z = (point[2] - 3.8)*10  
+        if self.downsample:
+            x = x*10 - 7.0 if x  >0 else x*10 + 7.0
+            y = y*10  - 7
+            z = (point[2] - 4.0)*10  
+
+        else:
+            # x = x*10 - 4.5 if x  >0 else x*10 + 4.5
+            # y = y*10  - 2.35 if y > 0 else y*10 + 2.35
+            # z = (point[2] - 3)*10  
+
+            if y < 0 :
+                modify = -1.5
+            elif y >=0:
+                modify = 1.5
+            
+            if x<0 :
+                x_modify = - 2.75
+            elif x>=0:
+                x_modify = + 2.75
+                
+            # modify = 0
+
+            # x_modify = 0
+
+            x *= 10
+            y *= 10
+            z*= 10
+
+
+        # x = x*10 - 4.5 if x  >0 else x*10 + 4.5
+        # y = y*10  - 2.65 if y > 0 else y*10 + 2.65
+        # # z = (point[2] - 3.8)*10  
+        # z = (point[2] - 3.8)*10  
 
         # point cloud send to calibration process
         point = (-x,y,z)
@@ -75,9 +112,16 @@ class cameraRobot(cameraApplications):
         homo_2_transVector = homo[:3,3]
         rotMatrix_2_euler = Rotation.from_matrix(homo_2_RotMatrix).as_euler('xyz', degrees=True)
 
+        # b, c = 34.67, -158.85
+        b, c =  self.robot_pose_scan[-2], self.robot_pose_scan[-1]
 
-        final_pose = [homo_2_transVector[0], homo_2_transVector[1] , homo_2_transVector[2] -7,
-                      self.robot_pose_scan[-3],self.robot_pose_scan[-2],self.robot_pose_scan[-1]] # keep A,B,C the same with robot pose scan.
+        final_pose = [homo_2_transVector[0] + x_modify, homo_2_transVector[1] + modify, homo_2_transVector[2] - 2.5,
+                      self.robot_pose_scan[-3],
+                    #   self.robot_pose_scan[-2],
+                    #   self.robot_pose_scan[-1]
+                    b,c
+                      
+                      ] # keep A,B,C the same with robot pose scan.
 
         return final_pose
 
@@ -101,12 +145,63 @@ class cameraRobot(cameraApplications):
         """
 
         # pts = json.loads(requests.get(url).text)[0]["route"]
-        pts = [{ "points": "(18.45, 14.91, 85.93)"},]
+        
+
+        if not self.downsample:
+            # pts = [{ "points": "(-10.20, 2.09, 86.99)"},]
+
+            # pts = [{ "points": "(17.10, -13.73, 85.96)"},]
+                
+
+            pts = [
+                
+
+                    # { "points": "(-14.69, 5.83, 92.55)"},
+
+                    # { "points": "(2.06, 5.57, 91.81)"},
+                
+                    # { "points": "(-9.31, -5.74, 84.66)"},
+                    # { "points": "(-8.17, -4.15, 84.39)"},
+                    # { "points": "(-6.46, -4.38, 84.3)"},
+                    # { "points": "(-6.67, -6.68, 84.51)"},
+                
+                    # { "points": "(-13.37, 2.9, 84.87)"},
+                    # { "points": "(-12.19, 2.75, 84.7)"},
+                    # { "points": "(-11.24, 2.22, 84.52)"},
+                    # { "points": "(-10.62, 0.93, 84.41)"},
+                    # { "points": "(-11.59, -0.02, 84.55)"},
+                
+
+                    { "points": "(9.8, -2.95, 81.26)"},
+                    { "points": "(9.71, -3.63, 81.26)"},
+                    { "points": "(9.61, -4.37, 81.26)"},
+
+
+
+                   ]            
+
+
+        else:
+            # pts = [{ "points": "(-9.96, 2.32, 87.25)"},]
+
+            # pts = [{ "points": "(-10.05, 2.8, 87.18)"},]
+            pts = [{ "points": "(-21.63, 12.49, 87.72)"},]
+
+
+            pts = [{ "points": "(-4.93, -9.87, 84.62)"}, 
+                   { "points": "(-5.2, -8.51, 84.42)"},
+                   { "points": "(-4.85, 7.35, 84.26)"},
+                   { "points": "(-3.57, 7.64, 84.30)"},
+                   { "points": "(-2.77, 8.45, 84.35)"},
+                   { "points": "(-2.19, 9.37, 84.46)"},
+
+                   ]            
 
 
         return pts
     
-    def parse_data(self, pts):
+    def parse_data(self, pts, id):
+        data_path = os.path.join(settings.MEDIA_ROOT, f'camera_data/{id}', '0.ply')
         """ Parse data from database.
         Args:
             pts(list): The points from database. 
@@ -125,12 +220,30 @@ class cameraRobot(cameraApplications):
                     [[-15.7801, -10.6459, 82.2589, -180.0, 0.0, 180.0], 
                     [-13.6308, -13.6941, 82.1895, -180.0, 0.0, 180.0]]
         """
+        if self.pc:
+            align_pc = self.pc.point_cloud().copy_data('xyz').reshape((-1,3))
+        else:
+            # align_pc = np.asarray(o3d.io.read_point_cloud('data/align/0.ply').points)
+            align_pc = np.asarray(o3d.io.read_point_cloud(data_path).points)
+        
         points = []
-        for point in pts:
+
+        for idx, point in enumerate(pts):
             point = point["points"]
             
             point = re.sub("[()]", "", point)
             point = [float(p) for p in point.split(",")]
+
+            # point = (pts_[idx]/[-10,10,10]).tolist()
+
+            point = self.find_closest_point(np.asarray([point]), align_pc, k = 5, method = 'all').tolist()
+
+            if self.downsample:
+                # point = self.find_closest_point(np.asarray([point]), align_pc/10, k = 1)
+                # point[:, 2] -= 3.5
+                # point = np.mean(point, axis = 0).tolist()
+                point = point
+
 
             point += self.robot_pose_scan[3:].tolist()      # Add default a, b and c angle to point.
             points.append(point)
@@ -153,13 +266,16 @@ class cameraRobot(cameraApplications):
 
         final_poses = []
         for p in points:
+            
             p = self.cam2world(p)            
             final_poses.append(p)
 
+
+        print(final_poses)
         while len(final_poses) < self.max_points:
             final_poses.append(final_poses[-1])
 
-        # os.system(self.ethnet_command) # Open ethnet
+        #os.system(self.ethnet_command) # Open ethnet
         return final_poses
 
 
@@ -171,13 +287,12 @@ class cameraRobot(cameraApplications):
             self.connectObject = connectObj()
 
             connect = self.connectObject.connect(self.ip, self.port)
-            print(connect)
 
             if not connect:
                 text = 'Connect Fail'                    
             else:
                 text = 'Connected OK' 
-
+                print(text)
                 break
 
     def send_robot_data(self, real_position, interval = 50):
@@ -200,6 +315,8 @@ class cameraRobot(cameraApplications):
             connect = self.connectObject.sendData(1,sendPos, interval)
             if not connect:
                 text = 'Send Points Error'    
+                self.connect()
+               
                 continue            
             stauts = connect[0].text
             send_count += 1
@@ -207,13 +324,50 @@ class cameraRobot(cameraApplications):
             print(text)  
             if stauts == 'Done':
                 print('Finish sending process')
-                break        
+                break  
 
+    def find_closest_point(self, target_point, points_array, k = 5, method = 'xy'):
+        # target_point[0][2] -= 3.8
+        factor = [-10, 10, 10]
+        target_point = target_point.squeeze()
+        if method == 'xy':
+            distances = np.linalg.norm(points_array[:,:-1] - target_point[:-1]*factor[:-1], axis=1)
+        else:
+            x = target_point[0]
+            y = target_point[1]
+
+            x = 0
+            y = 0
+            z = 3.0
+            
+            x = -0.3 if x>0 else 0.3
+            y = +0.3 if y>0 else -0.3
+            
+            target_point -= [x, y, z]
+
+            distances = np.linalg.norm(points_array - target_point*factor, axis=1)
+        index = np.argsort(distances)[:k]
+        
+        closest_point = points_array[index]/factor
+        if k >= 2:
+            closest_point = np.mean(closest_point, axis = 0)
+        return closest_point        
 
 # if __name__ == '__main__':
+#     from sklearn.neighbors import KDTree
 #     camRobot = cameraRobot()
 #     points = camRobot.get_data('https://threed-object.onrender.com/get_object_3d/')
-
+#     ply = o3d.io.read_point_cloud('data/ply/1.ply')
 #     points = camRobot.parse_data(points)
+#     ply = np.asarray(ply.points)
+
+#     def find_closest_point(target_point, points_array):
+#         distances = np.linalg.norm(points_array - target_point, axis=1)
+#         # closest_index = np.argmin(distances)
+#         index = np.argsort(distances)[:5]
+#         closest_point = points_array[index]
+#         return closest_point    
+#     # distance, idx = KDTree(ply).query(np.asarray([points[0][:3]])*10)
+#     point = find_closest_point(np.asarray(points[0][:3])*10, ply)
 #     final_poses = camRobot.convert2real(points)
-#     print(final_poses)
+#     print(final_poses[0])

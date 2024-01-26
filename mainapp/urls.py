@@ -9,6 +9,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('save_draw_object/', views.save_draw_object, name="save_draw_object"),
     path('get_draw_object/', views.get_draw_object, name="get_draw_object"),
+    path('edit_draw_object_order/', views.edit_draw_object_order, name="edit_draw_object_order"),
     path('get_single_draw_object/<int:pk>/', views.get_single_draw_object, name="get_single_draw_object"),
     path('pin_draw_object/<int:pk>/', views.pin_draw_object, name="pin_draw_object"),
     path('select_draw_object/<int:pk>/', views.select_draw_object, name="select_draw_object"),

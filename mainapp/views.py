@@ -28,7 +28,7 @@ def execute_robot(request):
 
         # robot
         camRobot = cameraRobot()  
-        points = camRobot.parse_data(data)
+        points = camRobot.parse_data(data, obj.initial_objecte_id)
 
         real_position = camRobot.convert2real(points)
 
@@ -254,14 +254,36 @@ def get_draw_object(request):
     except:
         return Response('error', status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT'])
 def get_single_draw_object(request, pk):
     try:
         obj = DrawObject.objects.filter(id=int(pk)).first()
-        serializer = DrawObjectSerializer(obj, many=False)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == 'GET':
+            serializer = DrawObjectSerializer(obj, many=False)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.method == 'PUT':
+            orders = Order.objects.filter(draw_object=obj)
+            for order in orders:
+                order.delete()
+            for i in request.data.get('order'):
+                Order.objects.create(draw_object=obj, index=i)
+            return Response('ok', status=status.HTTP_200_OK)
+        
     except:
         return Response('error', status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def edit_draw_object_order(request):
+    try:
+        print('asdasdasd')
+        print(request.data)
+        # obj = DrawObject.objects.filter(id=int(1)).first()
+        # obj.order = '123'
+        # obj.save()
+        return Response('success', status=status.HTTP_200_OK) 
+    except:
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 def pin_draw_object(request, pk):

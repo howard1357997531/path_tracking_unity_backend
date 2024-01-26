@@ -71,7 +71,7 @@ class DrawObjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = DrawObject
         fields = ('id', 'date', 'dotsCol', 'image', 'modelCol', 'name', 'rotation', 
-                  'is_pinned', 'is_selected', 'initial_objecte_id', 'order', 'point', 'contiPoint',
+                  'is_pinned', 'is_selected', 'initial_object_id', 'order', 'point', 'contiPoint',
                   'linePoint', 'squarePoint' , 'polygonPoint', 'recPoint', 'circlePoint',
                   'ovalPoint', 'arcPoint')
 
