@@ -70,10 +70,10 @@ class DrawObjectSerializer(serializers.ModelSerializer):
     arcPoint = ArcPointSerializer(many=True, required=False)
     class Meta:
         model = DrawObject
-        fields = ('id', 'date', 'dotsCol', 'image', 'modelCol', 'name', 'rotation', 
+        fields = ('id', 'date', 'dotsCol', 'modelCol', 'name', 'rotation', 
                   'is_pinned', 'is_selected', 'initial_object_id', 'order', 'point', 'contiPoint',
                   'linePoint', 'squarePoint' , 'polygonPoint', 'recPoint', 'circlePoint',
-                  'ovalPoint', 'arcPoint')
+                  'ovalPoint', 'arcPoint', 'image')
 
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:

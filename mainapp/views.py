@@ -19,26 +19,24 @@ from .main.camRobot import cameraRobot
 @api_view(['POST'])
 def execute_robot(request):
     try:
-        id = request.data.get('id')
-        obj = DrawObject.objects.filter(id=int(id)).first()
-        serializer = DrawObjectSerializer(obj, many=False)
-        data = serializer.data.get('point')
-        # print(data)
-        print(id)
+        # id = request.data.get('id')
+        # obj = DrawObject.objects.filter(id=int(id)).first()
+        # serializer = DrawObjectSerializer(obj, many=False)
+        # data = serializer.data.get('point')
 
-        # robot
-        camRobot = cameraRobot()  
-        points = camRobot.parse_data(data, obj.initial_objecte_id)
+        # # robot
+        # camRobot = cameraRobot()  
+        # points = camRobot.parse_data(data, obj.initial_objecte_id)
 
-        real_position = camRobot.convert2real(points)
+        # real_position = camRobot.convert2real(points)
 
-        # os.system(camRobot.ethnet_command)     
-        camRobot.connect()
-        camRobot.send_robot_data(real_position)
-        # os.system(camRobot.wifi_command)
-        # print(points)
+        # # os.system(camRobot.ethnet_command)     
+        # camRobot.connect()
+        # camRobot.send_robot_data(real_position)
+        # # os.system(camRobot.wifi_command)
+
         print('手臂結束')
-        return Response(data, status=status.HTTP_200_OK)
+        return Response("ok", status=status.HTTP_200_OK)
     except:
         return Response('error', status=status.HTTP_400_BAD_REQUEST)
 import time
@@ -47,16 +45,16 @@ def open_camera(request):
     try:
         time.sleep(2)
         result=True
-        img_res_path = 'media/camera_data/60/1.jpg'
+        img_res_path = 'media/camera_data/62/1.jpg'
 
         # intel_camera
         # camRobot = cameraRobot('intel_camera')
         # result, img_res_path = camRobot.capture("open")
         
         # zivid
-        camRobot = cameraRobot()
+        # camRobot = cameraRobot()
         # os.system(camRobot.ethnet_command)
-        result, img_res_path = camRobot.capture("open")
+        # result, img_res_path = camRobot.capture("open")
         # os.system(camRobot.wifi_command)     
 
         if result:
@@ -70,16 +68,16 @@ def screen_shot(request):
     try:
         time.sleep(2)
         result=True
-        img_res_path = 'media/camera_data/60/2.jpg'
+        img_res_path = 'media/camera_data/62/5.jpg'
 
         # intel_camera
         # camRobot = cameraRobot('intel_camera')
         # result, img_res_path = camRobot.capture("screen_shot")
 
         # zivid
-        camRobot = cameraRobot()
+        # camRobot = cameraRobot()
         # os.system(camRobot.ethnet_command)
-        result, img_res_path = camRobot.capture("screen_shot")
+        # result, img_res_path = camRobot.capture("screen_shot")
         # os.system(camRobot.wifi_command)  
         
         if result:
@@ -93,15 +91,16 @@ def save_ply(request):
     try:
         time.sleep(2)
         result=True
+        print(request.data.get("inputText"))
 
         # intel_camera
         # camRobot = cameraRobot('intel_camera')
         # result, _ = camRobot.capture("save_ply")
 
         # zivid
-        camRobot = cameraRobot()
+        # camRobot = cameraRobot()
         # os.system(camRobot.ethnet_command)
-        result, _ = camRobot.capture("save_ply")
+        # result, _ = camRobot.capture("save_ply")
         # os.system(camRobot.wifi_command) 
         if result:
             obj = InitialObject.objects.filter(is_finished=True).last()
@@ -124,6 +123,7 @@ def preprocessing_ply(request):
     except:
         return Response('error', status=status.HTTP_400_BAD_REQUEST)
 
+# initial_object
 @api_view(['GET'])
 def get_initial_object(request):
     try:
@@ -155,6 +155,7 @@ def select_initial_object(request, pk):
     except:
         Response('error',status=status.HTTP_400_BAD_REQUEST)
 
+# draw_object
 @api_view(['POST'])
 def save_draw_object(request):
     try:
@@ -167,11 +168,12 @@ def save_draw_object(request):
         linePoint   形狀標點 Line
         squarePoint 形狀標點 Square
         '''
-        # data = request.data
+        data = request.data
         # del data['image']
         # print(data)
-        # print(','.join(map(str, data.get('order'))))
+
         if request.data.get('route', None) == None:
+            
             obj = DrawObject.objects.create(
                 date=request.data.get('date'),
                 dotsCol=request.data.get('dotsCol'),
@@ -179,9 +181,9 @@ def save_draw_object(request):
                 modelCol=request.data.get('modelCol'),
                 name=request.data.get('name'),
                 rotation=request.data.get('rotation'),
-                initial_objecte_id=request.data.get('id'),
+                initial_object_id=request.data.get('id'),
                         )
-            
+
             for i in request.data.get('order'):
                 Order.objects.create(
                     draw_object = obj,
@@ -262,13 +264,83 @@ def get_single_draw_object(request, pk):
             serializer = DrawObjectSerializer(obj, many=False)
             return Response(serializer.data, status=status.HTTP_200_OK)
         elif request.method == 'PUT':
-            orders = Order.objects.filter(draw_object=obj)
-            for order in orders:
-                order.delete()
-            for i in request.data.get('order'):
-                Order.objects.create(draw_object=obj, index=i)
-            return Response('ok', status=status.HTTP_200_OK)
-        
+            # 若是從showScreen傳過來
+            if len(request.data) != 2:
+                obj.dotsCol = request.data.get('dotsCol'),
+                obj.modelCol = request.data.get('modelCol'),
+                obj.name = request.data.get('name'),
+                obj.rotation = request.data.get('rotation'),
+                obj.save()
+
+                orders = Order.objects.filter(draw_object=obj)
+                points = Point.objects.filter(draw_object=obj)
+                contiPoints = ContiPoint.objects.filter(draw_object=obj)
+                linePoints = LinePoint.objects.filter(draw_object=obj)
+                squarePoints = SquarePoint.objects.filter(draw_object=obj)
+                polygonPoints = PolygonPoint.objects.filter(draw_object=obj)
+                recPoints = RecPoint.objects.filter(draw_object=obj)
+                circlePoints = CirclePoint.objects.filter(draw_object=obj)
+                ovalPoints = OvalPoint.objects.filter(draw_object=obj)
+                arcPoints = ArcPoint.objects.filter(draw_object=obj)
+
+                for order in orders:
+                    order.delete()
+                for i in request.data.get('order'):
+                    Order.objects.create(draw_object=obj, index=i)
+
+                for point in points:
+                    point.delete()
+                for i in request.data.get('point'):
+                    Point.objects.create(draw_object=obj, points=i.get('points'))
+
+                for contiPoint in contiPoints:
+                    contiPoint.delete()
+                for i in request.data.get('contiPoint'):
+                    ContiPoint.objects.create(draw_object=obj, points=i.get('points'))
+
+                for linePoint in linePoints:
+                    linePoint.delete()
+                for i in request.data.get('linePoint'):
+                    LinePoint.objects.create(draw_object=obj, points=i.get('points'))
+
+                for squarePoint in squarePoints:
+                    squarePoint.delete()
+                for i in request.data.get('squarePoint'):
+                    SquarePoint.objects.create(draw_object=obj, points=i.get('points'))
+                
+                for polygonPoint in polygonPoints:
+                    polygonPoint.delete()
+                for i in request.data.get('polygonPoint'):
+                    PolygonPoint.objects.create(draw_object=obj, points=i.get('points'))
+
+                for recPoint in recPoints:
+                    recPoint.delete()
+                for i in request.data.get('recPoint'):
+                    RecPoint.objects.create(draw_object=obj, points=i.get('points'))
+                
+                for circlePoint in circlePoints:
+                    circlePoint.delete()
+                for i in request.data.get('circlePoint'):
+                    CirclePoint.objects.create(draw_object=obj, points=i.get('points'))
+
+                for ovalPoint in ovalPoints:
+                    ovalPoint.delete()
+                for i in request.data.get('ovalPoint'):
+                    OvalPoint.objects.create(draw_object=obj, points=i.get('points'))
+
+                for arcPoint in arcPoints:
+                    arcPoint.delete()
+                for i in request.data.get('arcPoint'):
+                    ArcPoint.objects.create(draw_object=obj, points=i.get('points'))
+
+            # 若是從showScreen傳過來只有 {'id': 41, 'order': [4, 2]}
+            elif len(request.data) == 2:
+                orders = Order.objects.filter(draw_object=obj)
+                for order in orders:
+                    order.delete()
+                for i in request.data.get('order'):
+                    Order.objects.create(draw_object=obj, index=i)
+            return Response('ok', status=status.HTTP_200_OK)     
     except:
         return Response('error', status=status.HTTP_400_BAD_REQUEST)
     
